@@ -3,27 +3,24 @@ const bcryptjs = require('bcryptjs')
 const { validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
 
-exports.createUser = async (req, res) => {
+exports.authenticateUser = async (req, res) => {
   const errors = validationResult(req)
   if(!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() })
   }
 
-  const { username, email, password } = req.body
+  const { username, password } = req.body
 
   try {
-    let user = await User.findOne({$or: [{ username },{ email }]})
-
-    if(user) {
-      return res.status(400).json({ msg: 'User already exists' })
+    let user = await User.findOne({ username: username })
+    if(!user) {
+      return res.status(400).json({ msg: 'User does not exist' })
     }
 
-    user = new User(req.body)
-
-    const salt = await bcryptjs.genSalt(10);
-    user.password = await bcryptjs.hash(password, salt)
-
-    await user.save()
+    const correctPassword = await bcryptjs.compare(password, user.password)
+    if(!correctPassword) {
+      return res.status(400).json({ msg: 'The username or password is incorrect' })
+    }
 
     const payload = {
       user: {
@@ -35,12 +32,9 @@ exports.createUser = async (req, res) => {
       expiresIn: 60 * 60 * 24 * 7
     }, (error, token) => {
       if(error) throw error
-      res.json({ msg: 'User created', token })
+      res.json({ msg: 'Authenticated user', token })
     })
-
-    // res.status(201).json({ msg: 'User created' })
   } catch(error) {
     console.log(error)
-    res.status(400).send("Ups! Error")
   }
 }
