@@ -35,7 +35,7 @@ exports.createUser = async (req, res) => {
       expiresIn: 60 * 60 * 24 * 7
     }, (error, token) => {
       if(error) throw error
-      res.json({ msg: 'User created', token })
+      res.status(201).json({ msg: 'User created', token })
     })
 
     // res.status(201).json({ msg: 'User created' })
