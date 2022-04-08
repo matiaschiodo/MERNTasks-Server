@@ -9,10 +9,10 @@ exports.authenticateUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() })
   }
 
-  const { username, password } = req.body
+  const { email, password } = req.body
 
   try {
-    let user = await User.findOne({ username: username })
+    let user = await User.findOne({ email: email })
     if (!user) {
       return res.status(400).json({ msg: 'User does not exist' })
     }
@@ -51,5 +51,11 @@ exports.userAuthenticated = async (req, res) => {
   } catch (error) {
     console.log(error)
     res.status(500).json({ msg: 'There was an error' })
+  }
+}
+
+const funcion = async (array) => {
+  for (let i = 0; i < array.length; i++) {
+    array[i]
   }
 }
